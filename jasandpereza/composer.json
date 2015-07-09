@@ -1,5 +1,5 @@
 {
-  "name": "addmany",
+  "name": "jasandpereza/addmany",
   "type": "library",
   "description": "AddMany is a TacoWordPress add-on that allows you to create an arbitrary number of fields for custom posts in the WordPress admin",
   "license": "proprietary",

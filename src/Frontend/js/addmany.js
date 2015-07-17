@@ -13,7 +13,7 @@ define([
   var AddMany = function() {};
 
   // Allow access to the AddMany Prototype outside of the jQuery
-  // namspace so it can be extended
+  // namespace so it can be extended
   AddMany.prototype = {
     
     $this_object: null,

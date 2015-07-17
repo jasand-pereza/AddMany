@@ -6,7 +6,6 @@
  */
 
 namespace JasandPereza;
-
 use \Taco\Util\Arr;
 use \Taco\Util\Collection;
 
@@ -106,7 +105,7 @@ class AddMany {
     if(!array_key_exists('field_assigned_to', $post_data)) {
       return false;
     }
-    $subpost = new SubPost;
+    $subpost = new \SubPost;
     $subpost->set('post_title', 'subpost');
     $subpost->set('post_parent', $post_data['parent_id']);
     $subpost->set(
@@ -146,7 +145,7 @@ class AddMany {
   // This is if a user creates new sub-posts but then leaves the page
   // without hitting the publish or update button
   public static function removeAbandonedPosts() {
-    $sub_posts = SubPost::getWhere(array('post_parent' => 0));
+    $sub_posts = \SubPost::getWhere(array('post_parent' => 0));
     foreach($sub_posts as $sp) {
       wp_delete_post($sp->ID, true);
     }
@@ -235,7 +234,7 @@ class AddMany {
 
   public static function updateSubPosts($post_id, $fields_values, $post_parent=null) {
     $post_id = trim(preg_replace('/\D/', '', $post_id));
-    $subpost = SubPost::find($post_id);
+    $subpost = \SubPost::find($post_id);
     
     if(wp_is_post_revision($post_parent)) return false;
     
@@ -263,7 +262,6 @@ class AddMany {
   }
 
   public static function saveAll($post_id) {
-
     if(self::areThereDeletedIds()) {
       self::deleteSubPosts($_POST['addmany_deleted_ids']);
     }

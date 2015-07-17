@@ -236,6 +236,7 @@ define([
     },
 
     createHandler: function(e) {
+      
       var $ = jQuery;
       var self = this;
       e.preventDefault();
@@ -319,6 +320,8 @@ define([
 
     getEmptySingleResultTemplateDynamic: function(post_id, subfields) {
       var html = [];
+      var li_attribs = this.getResultDefaultAttribs(post_id);
+
       var field_key = this.$this_object.attr('name');
       html.push('<li ' + li_attribs +'>');
       html.push('<table><tbody>');

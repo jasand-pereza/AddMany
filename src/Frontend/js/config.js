@@ -1,5 +1,5 @@
 requirejs.config({
-  baseUrl: "/wp-content/plugins/addmany/js/",
+  baseUrl: "/addons/addmany/Frontend/js/",
   deps: ['addmany'],
   paths: {
     jqueryui: 'lib/jquery-ui.min',

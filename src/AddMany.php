@@ -10,22 +10,18 @@ namespace JasandPereza;
 use \Taco\Util\Arr;
 use \Taco\Util\Collection;
 
-require_once __DIR__.'/sub-post.php';
-
-add_action('wp_ajax_AJAXSubmit', 'AddMany::AJAXSubmit');
-add_action('save_post', 'AddMany::saveAll');
-add_action('admin_footer', 'AddMany::init');
-
 class AddMany {
   const VERSION = '001';
   public static $field_definitions = [];
   public static $wp_tiny_mce_settings = null;
-
+  public static $path_url = null;
   public function init() {
-
+    if(is_null(self::$path_url)) {
+      self::$path_url = '/'.strstr(dirname(__FILE__), 'vendor');
+    }
     wp_register_script(
       'requirejs',
-      __DIR__.'/Frontend/js/require.js',
+      '/addons/addmany/Frontend/js/require.js',
       false,
       self::VERSION,
       true);
@@ -33,7 +29,7 @@ class AddMany {
 
     wp_register_script(
       'addmany_config',
-      __DIR__.'/Frontend/js/config.js',
+      '/addons/addmany/Frontend/js/config.js',
       false,
       self::VERSION,
       true);
@@ -41,7 +37,7 @@ class AddMany {
 
     wp_register_style(
       'addmany',
-      __DIR__.'/Frontend/css/addmany.css',
+      '/addons/addmany/Frontend/css/addmany.css',
       false,
       self::VERSION
     );
@@ -135,7 +131,6 @@ class AddMany {
   }
 
   public static function AJAXSubmit() {
-
     if(array_key_exists('get_by', $_POST)
       && array_key_exists('field_assigned_to', $_POST)
       && array_key_exists('parent_id', $_POST)

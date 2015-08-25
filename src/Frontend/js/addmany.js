@@ -420,7 +420,7 @@ define([
       var subfields = this.field_definitions[field_key];
       var fields_data = object.fields || {};
       var post_id = object.post_id;
-
+      console.log(fields_data);
       li_attribs = this.getResultDefaultAttribs(post_id);
 
       html.push('<li ' + li_attribs +'>');
@@ -454,18 +454,23 @@ define([
         }
         // a checkbox
         if(subfields[f].type == 'checkbox') {
+          var attribs = {
+            name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
+            type: 'checkbox',
+            value: (typeof subfields[f].value != 'undefined')
+              ? subfields[f].value
+              : 1,
+            class: field_class,
+          };
+
+          if(fields_data[f].value !== null) {
+            attribs.checked = 'checked';
+          }
+       
           html_field = Taco.Util.HTML.tag(
             'input',
             null,
-            {
-              name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
-              type: 'checkbox',
-              value: (typeof subfields[f].value != 'undefined')
-                ? subfields[f].value
-                : 1,
-              class: field_class,
-              checked: (fields_data[f].value) ? 'checked' : ''
-            },
+            attribs,
             true
           );
         }

@@ -232,14 +232,23 @@ class AddMany {
     exit;
   }
 
-  public static function updateSubPosts($post_id, $fields_values, $post_parent=null) {
+  public static function updateSubPosts($post_id, $fields_values, $object_post_parent=null) {
     $post_id = trim(preg_replace('/\D/', '', $post_id));
     $subpost = \SubPost::find($post_id);
+    $field_assigned_to = $subpost->get('field_assigned_to');
+    
+    $subpost_fields = \Taco\Post\Factory::create($object_post_parent->ID)
+      ->getFields()[$field_assigned_to]['fields'];
     
     if(wp_is_post_revision($post_parent)) return false;
+    $array_remove_values = array_diff(array_keys($subpost_fields), array_keys($fields_values));
     
     foreach($fields_values as $k => $v) {
       update_post_meta($post_id, $k, $v);
+    }
+
+    foreach($array_remove_values as $field_key) {
+      delete_post_meta($post_id, $field_key);
     }
     remove_action('save_post', 'AddMany::saveAll');
 
@@ -268,7 +277,7 @@ class AddMany {
     if(!array_key_exists('subposts', $_POST)) return false;
 
     $source = $_POST;
-    $subposts = $_POST['subposts'];
+    $subposts = $source['subposts'];
 
     if(!Arr::iterable($subposts)) return false;
     foreach($subposts as $record) {
@@ -277,7 +286,7 @@ class AddMany {
         self::updateSubPosts(
           $k,
           $v,
-          $post_id
+          $record
         );
       }
     }

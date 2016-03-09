@@ -106,7 +106,7 @@ class AddMany {
       return false;
     }
     $subpost = new \SubPost;
-    $subpost->set('post_title', 'subpost');
+    $subpost->set('post_title', 'AddMany subpost '.md5(mt_rand()));
     $subpost->set('post_parent', $post_data['parent_id']);
     $subpost->set(
       'field_assigned_to',

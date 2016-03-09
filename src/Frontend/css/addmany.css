@@ -3,16 +3,14 @@
   clear: both;
   width: 100%;
   overflow-y: scroll;
-  -webkit-transition: all 100ms ease .4s;
-  -moz-transition: all 500ms ease .4s;
-  -o-transition: all 500ms ease .4s;
   transition: all 500ms ease .4s;
 }
 .addmany-result {
   cursor: pointer;
-  width: 95%;
+  box-sizing: border-box;
+  width: 100%;
   height: auto;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
   padding-left: 10px;
   line-height: 27px;
   overflow: hidden;
@@ -25,16 +23,8 @@
   overflow-y: scroll;
 }
 .addmany-actual-values .addmany-result.postbox {
-  background-color: #F9F7F7;
-  -webkit-transition: background-color 500ms ease 1s;
-  -moz-transition: background-color 500ms ease 1s;
-  -o-transition: background-color 500ms ease 1s;
-  transition: background-color 500ms ease 1s;
-
-  -webkit-transition: color 500ms ease 1s;
-  -moz-transition: color 500ms ease 1s;
-  -o-transition: color 500ms ease 1s;
-  transition: color 500ms ease 1s;
+  background-color: #f9f9f9;
+  transition: background-color 500ms ease 1s, color 500ms ease 1s;
 }
 .addmany-actual-values .addmany-result.postbox.just-added {
   background-color: #0074a2;

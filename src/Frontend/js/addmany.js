@@ -45,15 +45,15 @@ define([
         .find('input[name="addmany_deleted_ids"]');
 
       $object.parent().prepend(
-        this.getCreateButtonTemplate() +
-        this.getToggleCollapseButtonTemplate()
+        this.getCreateButtonTemplate()
+        // + this.getToggleCollapseButtonTemplate()
       );
       $object.hide();
 
       this.$create_button = $object.parent()
         .find('.btn-addmany-create');
-      this.$collapse_button = $object.parent()
-        .find('.btn-addmany-toggle-collapse');
+      // this.$collapse_button = $object.parent()
+      //   .find('.btn-addmany-toggle-collapse');
       
       if(this.current_post_id !== null) {
         this.loadSaved(this.appendSaved);
@@ -163,7 +163,7 @@ define([
             $('.wysiwyg').each(function() {
               $(this).show();
               // copy it
-             // var new_settings = {};
+              // var new_settings = {};
               // $.extend(true, new_settings, wp_tiny_mce_settings);
               // new_settings.selector = '#addmanywysiwyg_0';
               // console.log($(this).attr('id'));
@@ -258,7 +258,7 @@ define([
       });
     },
 
-    toggleCollapaseHandler: function(e) {
+    toggleCollapseHandler: function(e) {
       e.preventDefault();
       this.$this_object.parent().find('.mce-tinymce').toggle();
       this.is_collapsed = (!this.$this_object.parent()
@@ -276,7 +276,7 @@ define([
     addEvents: function() {
       var $ = jQuery;
       this.$create_button.on('click', $.proxy(this.createHandler, this));
-      this.$collapse_button.on('click', $.proxy(this.toggleCollapaseHandler, this));
+      // this.$collapse_button.on('click', $.proxy(this.toggleCollapseHandler, this));
     },
 
     getCreateButtonTemplate: function() {
@@ -510,7 +510,7 @@ define([
     },
 
     getActualValuesTemplate: function() {
-      return '<br><b>Your selection</b><ul class="addmany-actual-values"></li>';
+      return '<ul class="addmany-actual-values"></li>';
     },
 
     getEditLink: function() {

@@ -146,31 +146,27 @@ define([
       var self = this;
       var $ = jQuery;
 
-      return  {
+      return {
+        revert: 100,
         start: function(e, ui) {
-          self.$results_object.find('input').css({'opacity' : '0.3'})
-            .end().find('li').css({'border' : 'rgba(166, 166, 173, 0.61) dashed 2px'});
+          self.$results_object.addClass('sorting-results');
           self.$results_object.find('.wysiwyg').each(function () {
             tinyMCE.execCommand('mceRemoveEditor', true, $(this).attr('id'));
             $(this).hide();
           });
         },
         stop: function(e, ui) {
-          self.$results_object.find('textarea').each(function () {
-            self.$results_object.find('li').css('border', 'none')
-              .parent().find('input, textarea').css('opacity', 1);
-            });
-            $('.wysiwyg').each(function() {
-              $(this).show();
-              // copy it
-             // var new_settings = {};
-              // $.extend(true, new_settings, wp_tiny_mce_settings);
-              // new_settings.selector = '#addmanywysiwyg_0';
-              // console.log($(this).attr('id'));
-              // tinyMCE.init(new_settings);
-              tinyMCE.execCommand('mceAddEditor', true, $(this).attr('id'));
-
-            });
+          self.$results_object.removeClass('sorting-results');
+          $('.wysiwyg').each(function() {
+            $(this).show();
+            // copy it
+            // var new_settings = {};
+            // $.extend(true, new_settings, wp_tiny_mce_settings);
+            // new_settings.selector = '#addmanywysiwyg_0';
+            // console.log($(this).attr('id'));
+            // tinyMCE.init(new_settings);
+            tinyMCE.execCommand('mceAddEditor', true, $(this).attr('id'));
+          });
         }
       };
     },

@@ -331,7 +331,7 @@ define([
       post_title = (typeof post_title == 'undefined') ? '' : post_title;
       post_content = (typeof post_content == 'undefined') ? '' : post_content;
 
-      var html  = '<li style="height: auto!important; padding: 10px;" data-subpost-id="' + post_id + '" class="addmany-result postbox">';
+      var html  = '<li data-subpost-id="' + post_id + '" class="addmany-result postbox">';
           html += this.getDeleteButtonTemplate();
           html += '<input type="text" style="margin-bottom: 10px; width: 90%;" name="subposts['+ this.$this_object.attr('name') +'][' + post_id + '][post_title]" placeholder="title" value="' + post_title + '"><br>';
           html += '<textarea name="subposts[' + this.$this_object.attr('name') + '][' + post_id + '][post_content]" style="width: 90%;" placeholder="content">' + post_content +'</textarea>';
@@ -473,15 +473,10 @@ define([
     },
 
     getResultDefaultAttribs: function(post_id) {
-      var li_style = this.getStringFromObject({
-        height: 'auto !important',
-        padding: '10px'
-      });
       var li_classes = 'addmany-result postbox';
       return Taco.Util.HTML.attribs({
         'class': li_classes,
-        'data-subpost-id': post_id,
-        'style': li_style
+        'data-subpost-id': post_id
       });
     },
 

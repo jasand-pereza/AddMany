@@ -67,6 +67,64 @@ define([
 
       this.checkAndAddWYSIWYG();
 
+      this.addUploads(self.$this_object.find('li'));
+      
+      this.$this_object.find('.addmany-result').each(function() {
+        $(this).find('.upload').each(function(){
+          self.getPreviewThumb($(this));
+        });
+      });
+
+      window.$upload = null;
+
+      // Add an associated image thumbnail
+      $.fn.addImage = function(url) {
+        $(this).removeImage();
+        $(this).closest('div').prepend('<img src="' + url + '" class="thumbnail" />');
+        return $(this);
+      };
+      
+      // Remove an associated image thumbnail
+      $.fn.removeImage = function() {
+        $(this).closest('div').find('.thumbnail').remove();
+        return $(this);
+      };
+      
+
+      var getBaseURL = function() {
+        return [
+          location.protocol,
+          '//',
+          location.hostname,
+          (location.port && ":" + location.port),
+          '/'
+        ].join('');
+      };
+
+      //Method required by the modal that sends the URL back into the .upload field
+      window.previous_send_to_editor = window.send_to_editor;
+      window.send_to_editor = function(element_html) {
+        if(!$upload) {
+          return window.previous_send_to_editor(element_html);
+        }
+        // Update the URL
+        var $element = $(element_html);
+        var url = $element.attr('href');
+        if(!url) {
+          url = $element.attr('src');
+        }
+        url = url.replace(getBaseURL(), '/');
+        $upload.val(url);
+      
+        // Append thumb
+        if(url.match(/(jpeg|jpg|png|gif)$/)) {
+          $upload.addImage(url);
+        }
+      
+        // Close the modal
+        tb_remove();
+      };
+
 
       return this;
     },
@@ -126,6 +184,14 @@ define([
         );
         self.$results_object.append($new_template);
         var $recently_added = self.$results_object.find('li:last-child');
+        self.addUploads($recently_added);
+
+        //self.getPreviewThumb($recently_added.find('.upload'));
+
+        $recently_added.find('.upload').each(function(){
+          self.getPreviewThumb($(this));
+        });
+
         self.setupDeleteEvents(
           $recently_added
         );
@@ -253,7 +319,7 @@ define([
         $recently_added.find('.wysiwyg').attr('id', 'addmanywysiwyg_' + self.wysiwyg_inc);
      
         tinyMCE.execCommand('mceAddEditor', true, 'addmanywysiwyg_' + self.wysiwyg_inc);
-        
+        self.addUploads(self.$this_object.parent());
         self.wysiwyg_inc++;
       });
     },
@@ -336,6 +402,9 @@ define([
         field_class = (typeof subfields[f].class != 'undefined')
           ? subfields[f].class
           : '';
+        field_placeholder = (typeof subfields[f].placeholder != 'undefined')
+          ? subfields[f].placeholder
+          : '';
 
         // an input field
         if(Taco.Util.Arr.inArray(subfields[f].type, Taco.Util.HTML.getTextInputTypes())) {
@@ -346,7 +415,7 @@ define([
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
               value: field_value,
-              class: field_class
+              'class': field_class
             },
             true
           );
@@ -359,7 +428,7 @@ define([
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
-              class: field_class
+              'class': field_class
             },
             true
           );
@@ -371,10 +440,46 @@ define([
             subfields[f].options[field_value],
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
-              class: field_class,
+              'class': field_class,
             }
           );
         }
+        // image/file
+        if(subfields[f].type == 'image' || subfields[f].type == 'file') {
+          upload_field = [];
+          upload_field.push('<div class="upload_field">');
+
+          upload_field.push(Taco.Util.HTML.tag(
+            'input',
+            field_value,
+            {
+              type: 'text',
+              placeholder: field_placeholder,
+              name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
+              'class': field_class + ' upload',
+            }
+          ));
+          upload_field.push(Taco.Util.HTML.tag(
+            'input',
+            null,
+            {
+              type: 'button',
+              value: 'Select file',
+              'class': 'browse'
+            }
+          ));
+          upload_field.push(Taco.Util.HTML.tag(
+            'input',
+            null,
+            {
+              type: 'button',
+              value: 'Clear',
+              'class': 'clear'
+            }
+          ));
+          html_field = upload_field.join('');
+        }
+
         if(subfields[f].type == 'checkbox') {
           html_field = Taco.Util.HTML.tag(
             'input',
@@ -420,7 +525,7 @@ define([
       var subfields = this.field_definitions[field_key];
       var fields_data = object.fields || {};
       var post_id = object.post_id;
-      console.log(fields_data);
+      
       li_attribs = this.getResultDefaultAttribs(post_id);
 
       html.push('<li ' + li_attribs +'>');
@@ -436,6 +541,9 @@ define([
           : 'text';
         field_class = (typeof fields_data[f].attribs.class != 'undefined')
           ? fields_data[f].attribs.class
+          : '';
+        field_placeholder = (typeof subfields[f].placeholder != 'undefined')
+          ? subfields[f].placeholder
           : '';
 
         // an input field
@@ -460,7 +568,7 @@ define([
             value: (typeof subfields[f].value != 'undefined')
               ? subfields[f].value
               : 1,
-            class: field_class,
+            'class': field_class,
           };
 
           if(fields_data[f].value !== null) {
@@ -481,9 +589,45 @@ define([
             subfields[f].options[field_value],
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
-              class: field_class,
+              'class': field_class,
             }
           );
+        }
+        // image/file
+        if(subfields[f].type == 'image' || subfields[f].type == 'file') {
+          upload_field = [];
+          upload_field.push('<div class="upload_field">');
+
+          upload_field.push(Taco.Util.HTML.tag(
+            'input',
+            null,
+            {
+              type: 'text',
+              value: field_value,
+              placeholder: field_placeholder,
+              name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
+              'class': field_class + ' upload',
+            }
+          ));
+          upload_field.push(Taco.Util.HTML.tag(
+            'input',
+            null,
+            {
+              type: 'button',
+              value: 'Select file',
+              'class': 'browse'
+            }
+          ));
+          upload_field.push(Taco.Util.HTML.tag(
+            'input',
+            null,
+            {
+              type: 'button',
+              value: 'Clear',
+              'class': 'clear'
+            }
+          ));
+          html_field = upload_field.join('');
         }
         // textarea
         if(subfields[f].type == 'textarea') {
@@ -493,7 +637,7 @@ define([
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
-              class: field_class
+              'class': field_class
             },
             true
           );
@@ -515,5 +659,60 @@ define([
 
     getEditLink: function() {
       return ' <a target="_blank" href="/wp-admin/post-new.php?post_type=page">Edit New Item</a>';
+    },
+
+    getPreviewThumb: function($obj) {
+      if($obj.val().search(/jpg|jpeg|png|gif/gi) > -1) {
+        $obj.addImage($obj.val());
+      }
+    },
+
+    addUploads: function($obj) {
+
+      $obj.find('.browse').click(function() {
+        // Make sure the modal inserts the URL into the correct field
+        var $input_upload = $(this).parent().find('.upload');
+
+        $upload = $input_upload;
+
+        formfield = $upload.attr('name');
+        tb_show('', 'media-upload.php?type=image&amp;TB_iframe=true');
+        return false;
+      });
+
+      // Clear buttons
+      $obj.find('.clear').click(function() {
+        if(confirm('Are you sure you want to clear this field?')) {
+          $(this).siblings('.upload').val('');
+          $(this).removeImage();
+        }
+      });
+      
+      // Initial loading of thumbnail
+      $obj.find('.upload').each(function() {
+        if($(this).val().match(/(jpg|jpeg|png|gif)$/)) {
+          $(this).addImage($(this).val());
+        }
+      });
+
+      // Track paste event in case a URL is added
+      $obj.find('.upload').on('paste', function() {
+        var $field = $(this);
+        
+        // Use setTimeout so that the value can populate before you try grabbing it
+        setTimeout(function() {
+          $field.addImage($field.val());
+        }, 100);
+      });
+      
+      // On key up, check for images
+      $('#poststuff').on('keyup', '.upload', function() {
+        if($(this).val().match(/(jpg|jpeg|png|gif)$/)) {
+          $(this).addImage($(this).val());
+        } else {
+          $(this).removeImage();
+        }
+      });
+
     }
   };

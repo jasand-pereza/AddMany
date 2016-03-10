@@ -1,5 +1,4 @@
 <?php
-namespace JasandPereza;
 
 class SubPost extends \Taco\Post {
   final public function getFields() {

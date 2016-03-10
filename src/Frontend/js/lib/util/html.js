@@ -22,7 +22,7 @@ Taco.Util.HTML.attribs = function(attribs, leading_space) {
   for(var key in attribs) {
 
     var value = attribs[key];
-    value = (typeof value == 'object') ? this.objectJoin(' ', value) : value;
+    value = (typeof value == 'object') ? Taco.Util.Obj.objectJoin(' ', value) : value;
     out.push(key + '="' + String(value).replace(/\"/, '\"') + '"');
   }
   return ((leading_space) ? ' ' : '') + out.join(' ');

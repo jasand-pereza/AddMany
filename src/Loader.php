@@ -2,7 +2,7 @@
 
 namespace JasandPereza;
 use \FrontendLoader\FrontendLoader;
-require __DIR__.'/sub-post.php';
+require __DIR__.'/SubPost.php';
 
 class Loader
 {

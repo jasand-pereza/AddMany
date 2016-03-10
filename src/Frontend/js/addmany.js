@@ -61,7 +61,7 @@
         });
       });
 
-      //window.$upload = null;
+      window.$upload = null;
 
       // Add an associated image thumbnail
       $.fn.addImage = function(url) {
@@ -74,6 +74,40 @@
       $.fn.removeImage = function() {
         $(this).closest('div').find('.thumbnail').remove();
         return $(this);
+      };
+
+      var getBaseURL = function() {
+        return [
+          location.protocol,
+          '//',
+          location.hostname,
+          (location.port && ":" + location.port),
+          '/'
+        ].join('');
+      };
+      
+      // Method required by the modal that sends the URL back into the .upload field
+      window.old_send_to_editor = window.send_to_editor;
+      window.send_to_editor = function(element_html) {
+        if(!$upload) {
+          return window.old_send_to_editor(element_html);
+        }
+        // Update the URL
+        var $element = $(element_html);
+        var url = $element.attr('href');
+        if(!url) {
+          url = $element.attr('src');
+        }
+        url = url.replace(getBaseURL(), '/');
+        $upload.val(url);
+        
+        // Append thumb
+        if(url.match(/(jpeg|jpg|png|gif)$/)) {
+          $upload.addImage(url);
+        }
+        
+        // Close the modal
+        tb_remove();
       };
     
       return this;
@@ -577,6 +611,7 @@
     },
 
     getPreviewThumb: function($obj) {
+      console.log($obj)
       if($obj.val().search(/jpg|jpeg|png|gif/gi) > -1) {
         $obj.addImage($obj.val());
       }

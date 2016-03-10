@@ -19,14 +19,12 @@ define([
     $this_object: null,
     $results_object: null,
     $create_button: null,
-    $collapse_button: null,
     $input_original: null,
     $deleted_values_input: null,
     field_definitions: {},
     current_post_id: null,
     saved_values: [],
     deleted_values: [],
-    is_collapsed: false,
     wysiwyg_inc: 0,
 
     init: function($object) {
@@ -45,15 +43,13 @@ define([
         .find('input[name="addmany_deleted_ids"]');
 
       $object.parent().prepend(
-        this.getCreateButtonTemplate() +
-        this.getToggleCollapseButtonTemplate()
+        this.getCreateButtonTemplate()
       );
       $object.hide();
 
       this.$create_button = $object.parent()
         .find('.btn-addmany-create');
-      this.$collapse_button = $object.parent()
-        .find('.btn-addmany-toggle-collapse');
+
       
       if(this.current_post_id !== null) {
         this.loadSaved(this.appendSaved);
@@ -212,31 +208,21 @@ define([
       var self = this;
       var $ = jQuery;
 
-      return  {
+      return {
+        revert: 100,
         start: function(e, ui) {
-          self.$results_object.find('input').css({'opacity' : '0.3'})
-            .end().find('li').css({'border' : 'rgba(166, 166, 173, 0.61) dashed 2px'});
+          self.$results_object.addClass('sorting-results');
           self.$results_object.find('.wysiwyg').each(function () {
             tinyMCE.execCommand('mceRemoveEditor', true, $(this).attr('id'));
             $(this).hide();
           });
         },
         stop: function(e, ui) {
-          self.$results_object.find('textarea').each(function () {
-            self.$results_object.find('li').css('border', 'none')
-              .parent().find('input, textarea').css('opacity', 1);
-            });
-            $('.wysiwyg').each(function() {
-              $(this).show();
-              // copy it
-             // var new_settings = {};
-              // $.extend(true, new_settings, wp_tiny_mce_settings);
-              // new_settings.selector = '#addmanywysiwyg_0';
-              // console.log($(this).attr('id'));
-              // tinyMCE.init(new_settings);
-              tinyMCE.execCommand('mceAddEditor', true, $(this).attr('id'));
-
-            });
+          self.$results_object.removeClass('sorting-results');
+          $('.wysiwyg').each(function() {
+            $(this).show();
+            tinyMCE.execCommand('mceAddEditor', true, $(this).attr('id'));
+          });
         }
       };
     },
@@ -324,33 +310,13 @@ define([
       });
     },
 
-    toggleCollapaseHandler: function(e) {
-      e.preventDefault();
-      this.$this_object.parent().find('.mce-tinymce').toggle();
-      this.is_collapsed = (!this.$this_object.parent()
-        .find('.mce-tinymce').is(':visible')
-      );
-      if(this.is_collapsed) {
-        this.$results_object.sortable('destroy');
-        this.$results_object.sortable(this.getSortableConfig());
-      } else {
-        this.$results_object.sortable('destroy');
-        this.$results_object.sortable();
-      }
-    },
-
     addEvents: function() {
       var $ = jQuery;
       this.$create_button.on('click', $.proxy(this.createHandler, this));
-      this.$collapse_button.on('click', $.proxy(this.toggleCollapaseHandler, this));
     },
 
     getCreateButtonTemplate: function() {
       return '<button class="btn-addmany-create button">Create new</button>';
-    },
-
-    getToggleCollapseButtonTemplate: function() {
-      return '<button class="btn-addmany-toggle-collapse button">Collapse All</button>';
     },
 
     getDeletedValuesInputTemplate: function() {
@@ -654,7 +620,7 @@ define([
     },
 
     getActualValuesTemplate: function() {
-      return '<br><b>Your selection</b><ul class="addmany-actual-values"></li>';
+      return '<ul class="addmany-actual-values"></li>';
     },
 
     getEditLink: function() {

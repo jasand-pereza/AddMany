@@ -24,6 +24,13 @@
   height: auto;
   overflow-y: scroll;
 }
+.addmany-actual-values.sorting-results > li {
+  border: rgba(166, 166, 173, 0.61) dashed 2px;
+}
+.addmany-actual-values.sorting-results input,
+.addmany-actual-values.sorting-results textarea {
+  opacity: 0.3;
+}
 .addmany-actual-values .addmany-result.postbox {
   background-color: #F9F7F7;
   -webkit-transition: background-color 500ms ease 1s;
@@ -47,12 +54,6 @@
   line-height: 40px;
 }
 .addmany-actual-values li img {
-  width: 15px;
-  height: auto;
-  float: right;
-  margin-right: 8px;
-  margin-top: 7px;
-  opacity: 0.5;
 }
 .addmany-actual-values a {
   display: block;

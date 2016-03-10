@@ -19,20 +19,69 @@ class AddMany {
       self::$path_url = '/'.strstr(dirname(__FILE__), 'vendor');
     }
     wp_register_script(
-      'requirejs',
-      '/addons/addmany/Frontend/js/require.js',
+      'addmany_jquery',
+      '/addons/addmany/Frontend/js/lib/jquery-1.11.3.min.js',
       false,
       self::VERSION,
       true);
-    wp_enqueue_script('requirejs');
+    wp_enqueue_script('addmany_jquery');
 
     wp_register_script(
-      'addmany_config',
-      '/addons/addmany/Frontend/js/config.js',
+      'addmany_jqueryui',
+      '/addons/addmany/Frontend/js/lib/jquery-ui.min.js',
       false,
       self::VERSION,
       true);
-    wp_enqueue_script('addmany_config');
+    wp_enqueue_script('addmany_jqueryui');
+
+    wp_register_script(
+      'taco_util_str',
+      '/addons/addmany/Frontend/js/lib/util/str.js',
+      false,
+      self::VERSION,
+      true);
+    wp_enqueue_script('taco_util_str');
+
+    wp_register_script(
+      'taco_util_arr',
+      '/addons/addmany/Frontend/js/lib/util/arr.js',
+      false,
+      self::VERSION,
+      true);
+    wp_enqueue_script('taco_util_arr');
+
+    wp_register_script(
+      'taco_util_general',
+      '/addons/addmany/Frontend/js/lib/util/general.js',
+      false,
+      self::VERSION,
+      true);
+    wp_enqueue_script('taco_util_general');
+
+    wp_register_script(
+      'taco_util_obj',
+      '/addons/addmany/Frontend/js/lib/util/obj.js',
+      false,
+      self::VERSION,
+      true);
+    wp_enqueue_script('taco_util_obj');
+
+    wp_register_script(
+      'taco_util_html',
+      '/addons/addmany/Frontend/js/lib/util/html.js',
+      false,
+      self::VERSION,
+      true);
+    wp_enqueue_script('taco_util_html');
+
+    wp_register_script(
+      'addmanyjs',
+      '/addons/addmany/Frontend/js/addmany.js',
+      false,
+      self::VERSION,
+      true);
+    wp_enqueue_script('addmanyjs');
+
 
     wp_register_style(
       'addmany',
@@ -45,21 +94,21 @@ class AddMany {
     self::loadFieldDefinitions();
     
     wp_localize_script(
-      'addmany_config',
+      'addmanyjs',
       'field_definitions',
       self::$field_definitions
     );
 
     // Allow this plugin to access the Wordpress TinyMCE settings
     wp_localize_script(
-      'addmany_config',
+      'addmanyjs',
       'wp_tiny_mce_settings',
       self::$wp_tiny_mce_settings
     );
 
     // Allow this script to use admin-ajax.php
     wp_localize_script(
-      'addmany_config',
+      'addmanyjs',
       'AJAXSubmit',
       array(
         'ajaxurl' => admin_url('admin-ajax.php'),

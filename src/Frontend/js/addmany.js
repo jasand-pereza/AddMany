@@ -1,14 +1,4 @@
-define([
-  'jquery',
-  'jqueryui',
-  'lib/util/taco-util'],
-  function(html) {
-    if(!$('.addmany').length) return;
-    window.addmany_array = [];
-    $('.addmany').each(function() {
-      addmany_array.push((new AddMany()).init($(this)));
-    });
-  });
+(function($, window) {
 
   var AddMany = function() {};
 
@@ -71,7 +61,7 @@ define([
         });
       });
 
-      window.$upload = null;
+      //window.$upload = null;
 
       // Add an associated image thumbnail
       $.fn.addImage = function(url) {
@@ -85,43 +75,7 @@ define([
         $(this).closest('div').find('.thumbnail').remove();
         return $(this);
       };
-      
-
-      var getBaseURL = function() {
-        return [
-          location.protocol,
-          '//',
-          location.hostname,
-          (location.port && ":" + location.port),
-          '/'
-        ].join('');
-      };
-
-      //Method required by the modal that sends the URL back into the .upload field
-      window.previous_send_to_editor = window.send_to_editor;
-      window.send_to_editor = function(element_html) {
-        if(!$upload) {
-          return window.previous_send_to_editor(element_html);
-        }
-        // Update the URL
-        var $element = $(element_html);
-        var url = $element.attr('href');
-        if(!url) {
-          url = $element.attr('src');
-        }
-        url = url.replace(getBaseURL(), '/');
-        $upload.val(url);
-      
-        // Append thumb
-        if(url.match(/(jpeg|jpg|png|gif)$/)) {
-          $upload.addImage(url);
-        }
-      
-        // Close the modal
-        tb_remove();
-      };
-
-
+    
       return this;
     },
 
@@ -674,6 +628,12 @@ define([
           $(this).removeImage();
         }
       });
-
     }
   };
+
+  if(!$('.addmany').length) return;
+  
+  $('.addmany').each(function() {
+    (new AddMany()).init($(this));
+  });
+})(jQuery, window);

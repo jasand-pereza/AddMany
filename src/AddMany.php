@@ -356,7 +356,7 @@ class AddMany {
     return true;
   }
 
-  public function getSubPosts($fieldname, $post_id) {
+  public static function getSubPosts($fieldname, $post_id) {
 
     $record = \Taco\Post::find($post_id);
 

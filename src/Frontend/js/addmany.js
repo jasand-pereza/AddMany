@@ -16,6 +16,7 @@
     saved_values: [],
     deleted_values: [],
     wysiwyg_inc: 0,
+    current_variation: 'default_variation',
 
     init: function($object) {
       var self = this;
@@ -33,6 +34,10 @@
         .find('input[name="addmany_deleted_ids"]');
 
       $object.parent().prepend(
+        this.getFieldsVariationTemplate()
+      );
+
+      $object.parent().prepend(
         this.getCreateButtonTemplate()
       );
       $object.hide();
@@ -40,7 +45,6 @@
       this.$create_button = $object.parent()
         .find('.btn-addmany-create');
 
-      
       if(this.current_post_id !== null) {
         this.loadSaved(this.appendSaved);
       }
@@ -161,6 +165,7 @@
     appendSaved: function(data, context) {
       var self = context;
       var $ = jQuery;
+
       for(var result in data.posts) {
         var object_post = data.posts[result];
         var $new_template = self.getSingleResultTemplateDynamic(
@@ -169,8 +174,6 @@
         self.$results_object.append($new_template);
         var $recently_added = self.$results_object.find('li:last-child');
         self.addUploads($recently_added);
-
-        //self.getPreviewThumb($recently_added.find('.upload'));
 
         $recently_added.find('.upload').each(function(){
           self.getPreviewThumb($(this));
@@ -181,7 +184,6 @@
         );
       }
 
-     
       self.$results_object.sortable(self.getSortableConfig());
       
 
@@ -262,7 +264,8 @@
           parent_id: parent_id,
           action: 'AJAXSubmit',
           AJAXSubmit_nonce: AJAXSubmit.AJAXSubmit_nonce,
-          field_assigned_to: this.$this_object.attr('name')
+          field_assigned_to: this.$this_object.attr('name'),
+          current_variation: this.current_variation
         }
       }).success(function(d) {
         if(d.success) {
@@ -291,7 +294,8 @@
 
         var $recently_added = self.$results_object.find('li:last-child');
         $recently_added.find('.wysiwyg').attr('id', 'addmanywysiwyg_' + self.wysiwyg_inc);
-     
+        self.$results_object.sortable(self.getSortableConfig());
+
         tinyMCE.execCommand('mceAddEditor', true, 'addmanywysiwyg_' + self.wysiwyg_inc);
         self.addUploads(self.$this_object.parent());
         self.wysiwyg_inc++;
@@ -300,11 +304,41 @@
 
     addEvents: function() {
       var $ = jQuery;
+      var self = this;
       this.$create_button.on('click', $.proxy(this.createHandler, this));
+
+
+      var field_key = this.$this_object.attr('name');
+      var subfields = this.field_definitions[field_key];
+      
+      var options = $.map(subfields, function(i, key) {
+        return key;
+      });
+
+      this.$this_object.parent().find('select').on('change', function() {
+        self.current_variation = options[$(this).val()];
+      });
     },
 
     getCreateButtonTemplate: function() {
       return '<button class="btn-addmany-create button">Create new</button>';
+    },
+
+    getFieldsVariationTemplate: function() {
+      var field_key = this.$this_object.attr('name');
+      var subfields = this.field_definitions[field_key];
+     
+      var options = $.map(subfields, function(i, key) {
+        return key;
+      });
+    
+      return Taco.Util.HTML.selecty(
+        options,
+        '',
+        {
+          name: this.$this_object.attr('name')+'_fields_variation'
+        }
+      );
     },
 
     getDeletedValuesInputTemplate: function() {
@@ -469,17 +503,22 @@
     },
 
     getSingleResultTemplateDynamic: function(object) {
+      console.log(object);
       var html = [];
       var field_key = this.$this_object.attr('name');
-      var subfields = this.field_definitions[field_key];
+      //console.log(this.field_definitions[field_key]);
+
+      var subfields = this.field_definitions[field_key][object.fields_variation];
+      //console.log(subfields);
       var fields_data = object.fields || {};
       var post_id = object.post_id;
-      
+      //console.log(fields_data);
       li_attribs = this.getResultDefaultAttribs(post_id);
 
       html.push('<li ' + li_attribs +'>');
       html.push('<table><tbody>');
       for(var f in subfields) {
+       // console.log(fields_data[f]);
         if(typeof subfields[f] != 'object') continue;
         var html_field = 'input';
         field_value = (typeof fields_data[f].value != 'undefined')

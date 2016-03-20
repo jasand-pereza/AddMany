@@ -65,55 +65,6 @@
         });
       });
 
-      window.$upload = null;
-
-      // Add an associated image thumbnail
-      $.fn.addImage = function(url) {
-        $(this).removeImage();
-        $(this).closest('div').prepend('<img src="' + url + '" class="thumbnail" />');
-        return $(this);
-      };
-      
-      // Remove an associated image thumbnail
-      $.fn.removeImage = function() {
-        $(this).closest('div').find('.thumbnail').remove();
-        return $(this);
-      };
-
-      var getBaseURL = function() {
-        return [
-          location.protocol,
-          '//',
-          location.hostname,
-          (location.port && ":" + location.port),
-          '/'
-        ].join('');
-      };
-      
-      // Method required by the modal that sends the URL back into the .upload field
-      window.old_send_to_editor = window.send_to_editor;
-      window.send_to_editor = function(element_html) {
-        if(!$upload) {
-          return window.old_send_to_editor(element_html);
-        }
-        // Update the URL
-        var $element = $(element_html);
-        var url = $element.attr('href');
-        if(!url) {
-          url = $element.attr('src');
-        }
-        url = url.replace(getBaseURL(), '/');
-        $upload.val(url);
-        
-        // Append thumb
-        if(url.match(/(jpeg|jpg|png|gif)$/)) {
-          $upload.addImage(url);
-        }
-        
-        // Close the modal
-        tb_remove();
-      };
-    
       return this;
     },
 
@@ -393,6 +344,13 @@
         field_placeholder = (typeof subfields[f].placeholder != 'undefined')
           ? subfields[f].placeholder
           : '';
+        field_id = (typeof subfields[f].id != 'undefined')
+          ? subfields[f].id
+          : Taco.Util.General.uniqid(
+              'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
+              'field'
+            );
+
 
         // an input field
         if(Taco.Util.Arr.inArray(subfields[f].type, Taco.Util.HTML.getTextInputTypes())) {
@@ -403,7 +361,8 @@
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
               value: field_value,
-              'class': field_class
+              'class': field_class,
+              id: field_id
             },
             true
           );
@@ -416,7 +375,8 @@
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
-              'class': field_class
+              'class': field_class,
+              id: field_id
             },
             true
           );
@@ -429,6 +389,7 @@
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               'class': field_class,
+              id: field_id
             }
           );
         }
@@ -445,6 +406,7 @@
               placeholder: field_placeholder,
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               'class': field_class + ' upload',
+              id: field_id
             }
           ));
           upload_field.push(Taco.Util.HTML.tag(
@@ -478,7 +440,8 @@
               value: (typeof subfields[f].value != 'undefined')
                 ? subfields[f].value
                 : 1,
-              class: field_class
+              class: field_class,
+              id: field_id
             },
             true
           );
@@ -503,22 +466,17 @@
     },
 
     getSingleResultTemplateDynamic: function(object) {
-      console.log(object);
       var html = [];
       var field_key = this.$this_object.attr('name');
-      //console.log(this.field_definitions[field_key]);
 
       var subfields = this.field_definitions[field_key][object.fields_variation];
-      //console.log(subfields);
       var fields_data = object.fields || {};
       var post_id = object.post_id;
-      //console.log(fields_data);
       li_attribs = this.getResultDefaultAttribs(post_id);
 
       html.push('<li ' + li_attribs +'>');
       html.push('<table><tbody>');
       for(var f in subfields) {
-       // console.log(fields_data[f]);
         if(typeof subfields[f] != 'object') continue;
         var html_field = 'input';
         field_value = (typeof fields_data[f].value != 'undefined')
@@ -533,6 +491,12 @@
         field_placeholder = (typeof subfields[f].placeholder != 'undefined')
           ? subfields[f].placeholder
           : '';
+        field_id = (typeof subfields[f].id != 'undefined')
+          ? subfields[f].id
+          : Taco.Util.General.uniqid(
+              'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
+              'field'
+            );
 
         // an input field
         if(Taco.Util.Arr.inArray(subfields[f].type, Taco.Util.HTML.getTextInputTypes())) {
@@ -543,7 +507,8 @@
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
               value: field_value,
-              class: field_class
+              class: field_class,
+              id: field_id
             },
             true
           );
@@ -557,6 +522,7 @@
               ? subfields[f].value
               : 1,
             'class': field_class,
+            id: field_id
           };
 
           if(fields_data[f].value !== null) {
@@ -578,6 +544,7 @@
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               'class': field_class,
+              id: field_id
             }
           );
         }
@@ -595,6 +562,7 @@
               placeholder: field_placeholder,
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               'class': field_class + ' upload',
+              id: field_id
             }
           ));
           upload_field.push(Taco.Util.HTML.tag(
@@ -625,7 +593,8 @@
             {
               name: 'subposts[' + this.$this_object.attr('name') + '][' + post_id + '][' + f + ']',
               type: field_type,
-              'class': field_class
+              'class': field_class,
+              id: field_id
             },
             true
           );
@@ -650,56 +619,17 @@
     },
 
     getPreviewThumb: function($obj) {
-      console.log($obj)
       if($obj.val().search(/jpg|jpeg|png|gif/gi) > -1) {
         $obj.addImage($obj.val());
       }
     },
 
     addUploads: function($obj) {
-
-      $obj.find('.browse').click(function() {
-        // Make sure the modal inserts the URL into the correct field
-        var $input_upload = $(this).parent().find('.upload');
-
-        $upload = $input_upload;
-
-        formfield = $upload.attr('name');
-        tb_show('', 'media-upload.php?type=image&amp;TB_iframe=true');
-        return false;
-      });
-
-      // Clear buttons
-      $obj.find('.clear').click(function() {
-        if(confirm('Are you sure you want to clear this field?')) {
-          $(this).siblings('.upload').val('');
-          $(this).removeImage();
-        }
-      });
-      
+  
       // Initial loading of thumbnail
       $obj.find('.upload').each(function() {
         if($(this).val().match(/(jpg|jpeg|png|gif)$/)) {
           $(this).addImage($(this).val());
-        }
-      });
-
-      // Track paste event in case a URL is added
-      $obj.find('.upload').on('paste', function() {
-        var $field = $(this);
-        
-        // Use setTimeout so that the value can populate before you try grabbing it
-        setTimeout(function() {
-          $field.addImage($field.val());
-        }, 100);
-      });
-      
-      // On key up, check for images
-      $('#poststuff').on('keyup', '.upload', function() {
-        if($(this).val().match(/(jpg|jpeg|png|gif)$/)) {
-          $(this).addImage($(this).val());
-        } else {
-          $(this).removeImage();
         }
       });
     }

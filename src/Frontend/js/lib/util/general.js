@@ -33,3 +33,33 @@ Taco.Util.General.getParamNames = function(func) {
      result = [];
   return result;
 };
+
+Taco.Util.General.eliminateDuplicates = function(arr) {
+  var i, len = arr.length,
+  out = [],
+  obj = {};
+
+  for(i = 0; i < len; i++) {
+    obj[arr[i]] = 0;
+  }
+  for(i in obj) {
+    out.push(i);
+  }
+  return out;
+};
+
+Taco.Util.General.uniqid = function(str, prefix) {
+  str = str.replace(/[^0-9a-z]/ig, '');
+  var len = str.length;
+  var chars = [];
+  var id_prefix = '';
+  if(typeof prefix != 'undefined') {
+    id_prefix = prefix;
+  }
+
+  for (var i = 0; i < len; i++) {
+    chars[i] = str[Math.floor((Math.random() * len))];
+  }
+  var filtered = this.eliminateDuplicates(chars);
+  return id_prefix + '-' + filtered.join('');
+};

@@ -10,7 +10,7 @@ use \Taco\Util\Arr;
 use \Taco\Util\Collection;
 
 class AddMany {
-  const VERSION = '002';
+  const VERSION = '003';
   public static $field_definitions = [];
   public static $wp_tiny_mce_settings = null;
   public static $path_url = null;
@@ -18,21 +18,6 @@ class AddMany {
     if(is_null(self::$path_url)) {
       self::$path_url = '/'.strstr(dirname(__FILE__), 'vendor');
     }
-    wp_register_script(
-      'addmany_jquery',
-      '/addons/addmany/Frontend/js/lib/jquery-1.11.3.min.js',
-      false,
-      self::VERSION,
-      true);
-    wp_enqueue_script('addmany_jquery');
-
-    wp_register_script(
-      'addmany_jqueryui',
-      '/addons/addmany/Frontend/js/lib/jquery-ui.min.js',
-      false,
-      self::VERSION,
-      true);
-    wp_enqueue_script('addmany_jqueryui');
 
     wp_register_script(
       'taco_util_str',
@@ -82,7 +67,6 @@ class AddMany {
       true);
     wp_enqueue_script('addmanyjs');
 
-
     wp_register_style(
       'addmany',
       '/addons/addmany/Frontend/css/addmany.css',
@@ -92,7 +76,7 @@ class AddMany {
     wp_enqueue_style('addmany');
 
     self::loadFieldDefinitions();
-    
+
     wp_localize_script(
       'addmanyjs',
       'field_definitions',
@@ -170,7 +154,7 @@ class AddMany {
       'fields_variation',
       trim($post_data['current_variation'])
     );
-    
+
     $id = $subpost->save();
     $response = json_encode(
       array(
@@ -234,11 +218,11 @@ class AddMany {
   }
 
   private static function getFieldDefinitionKeyAttribs($field_assigned_to, $parent_id, $fields_variation='default_variation') {
-    
+
     $record_fields = \Taco\Post\Factory::create($parent_id)
       ->getFields()[$field_assigned_to][$fields_variation]['fields'];
     $fields_attribs = [];
-    
+
     foreach($record_fields as $k => $attribs) {
       foreach($attribs as $a => $v) {
         if($a == 'value') continue;
@@ -252,7 +236,7 @@ class AddMany {
     $array_ids = array_map(function($id) {
       return trim((int) $id);
     }, $_POST['array_ids']);
-    
+
     // remove any sub-posts without parents
     //self::removeAbandonedPosts();
     $records = \Taco\Post\Factory::createMultiple($array_ids);
@@ -260,7 +244,7 @@ class AddMany {
     // filter out the fields we don't need
     $filtered = array_map(function($subpost) use ($field_assigned_to, $parent_id) {
       $post_title = $subpost->post_title;
-      
+
       $fields_variation = $subpost->get('fields_variation');
       $fields_attribs = self::getFieldDefinitionKeyAttribs($field_assigned_to, $parent_id, $fields_variation);
       $subfields = self::getFieldDefinitionKeys($field_assigned_to, $parent_id, $fields_variation);
@@ -275,7 +259,7 @@ class AddMany {
           'attribs' => $fields_attribs[$key]
         );
       }
-      
+
       return array_merge(
         array('fields' => $array_fields_values),
         array(
@@ -284,7 +268,7 @@ class AddMany {
         )
       );
     }, $records);
-    
+
     header('Content-Type: application/json');
     echo json_encode(
       array(
@@ -299,13 +283,13 @@ class AddMany {
     $post_id = trim(preg_replace('/\D/', '', $post_id));
     $subpost = \SubPost::find($post_id);
     $field_assigned_to = $subpost->get('field_assigned_to');
-    
+
     $subpost_fields = \Taco\Post\Factory::create($object_post_parent->ID)
       ->getFields()[$field_assigned_to]['default_variation']['fields'];
-    
+
     if(wp_is_post_revision($post_parent)) return false;
     $array_remove_values = array_diff(array_keys($subpost_fields), array_keys($fields_values));
-    
+
     foreach($fields_values as $k => $v) {
       update_post_meta($post_id, $k, $v);
     }
@@ -363,7 +347,7 @@ class AddMany {
     $field_ids = explode(',', $record->get($fieldname));
     $subposts = self::getSubPostsSafe($fieldname, $post_id);
     $subpost_ids = Collection::pluck($subposts, 'ID');
-    
+
     $filtered = [];
     foreach($field_ids as $fid) {
       if(!in_array($fid, $subpost_ids)) continue;

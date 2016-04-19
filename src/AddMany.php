@@ -10,7 +10,7 @@ use \Taco\Util\Arr;
 use \Taco\Util\Collection;
 
 class AddMany {
-  const VERSION = '003';
+  const VERSION = '004';
   public static $field_definitions = [];
   public static $wp_tiny_mce_settings = null;
   public static $path_url = null;
@@ -210,20 +210,22 @@ class AddMany {
     return $wpdb->get_results($query, OBJECT);
   }
 
-  private static function getFieldDefinitionKeys($field_assigned_to, $parent_id, $fields_variation='default_variation') {
+  private static function getFieldDefinitionKeys($field_assigned_to, $parent_id, $fields_variation) {
     return array_keys(
       \Taco\Post\Factory::create($parent_id)
         ->getFields()[$field_assigned_to][$fields_variation]['fields']
     );
   }
 
-  private static function getFieldDefinitionKeyAttribs($field_assigned_to, $parent_id, $fields_variation='default_variation') {
+  private static function getFieldDefinitionKeyAttribs($field_assigned_to, $parent_id, $fields_variation) {
 
     $record_fields = \Taco\Post\Factory::create($parent_id)
       ->getFields()[$field_assigned_to][$fields_variation]['fields'];
     $fields_attribs = [];
 
+    if(!Arr::iterable($record_fields)) return [];
     foreach($record_fields as $k => $attribs) {
+      if(!Arr::iterable($attribs)) continue;
       foreach($attribs as $a => $v) {
         if($a == 'value') continue;
         $fields_attribs[$k][$a] = $v;
@@ -232,26 +234,43 @@ class AddMany {
     return $fields_attribs;
   }
 
+
+  public static function getChildPosts($parent_id) {
+    return \Taco\Post\Factory::createMultiple(
+      get_posts(['post_type' => 'sub-post', 'post_parent' => $parent_id])
+    );
+  }
+
+
   private static function getAJAXSubPosts($field_assigned_to, $parent_id) {
     $array_ids = array_map(function($id) {
       return trim((int) $id);
     }, $_POST['array_ids']);
 
+
     // remove any sub-posts without parents
     //self::removeAbandonedPosts();
     $records = \Taco\Post\Factory::createMultiple($array_ids);
-
+    $all_records = self::getChildPosts($parent_id);
+    $diff = array_diff(Collection::pluck($all_records, 'ID'), $array_ids);
+    if(Arr::iterable($diff)) {
+      $records = array_merge($records, \Taco\Post\Factory::createMultiple($diff));
+    }
     // filter out the fields we don't need
     $filtered = array_map(function($subpost) use ($field_assigned_to, $parent_id) {
       $post_title = $subpost->post_title;
 
       $fields_variation = $subpost->get('fields_variation');
       $fields_attribs = self::getFieldDefinitionKeyAttribs($field_assigned_to, $parent_id, $fields_variation);
+      if(!Arr::iterable($fields_attribs)) return [];
       $subfields = self::getFieldDefinitionKeys($field_assigned_to, $parent_id, $fields_variation);
-
+      if(!Arr::iterable($subfields)) {
+        $subfields = array();
+      }
       if(isset($subpost->post_title) && preg_match('/[&\']{1,}/', $subpost->post_title)) {
         $post_title = stripslashes($subpost->post_title);
       }
+
       $array_fields_values = [];
       foreach($subfields as $key) {
         $array_fields_values[$key] = array(
@@ -282,13 +301,14 @@ class AddMany {
   public static function updateSubPosts($post_id, $fields_values, $object_post_parent=null) {
     $post_id = trim(preg_replace('/\D/', '', $post_id));
     $subpost = \SubPost::find($post_id);
+
     $field_assigned_to = $subpost->get('field_assigned_to');
 
     $subpost_fields = \Taco\Post\Factory::create($object_post_parent->ID)
-      ->getFields()[$field_assigned_to]['default_variation']['fields'];
+      ->getFields()[$field_assigned_to][$subpost->get('fields_variation')]['fields'];
 
     if(wp_is_post_revision($post_parent)) return false;
-    $array_remove_values = array_diff(array_keys($subpost_fields), array_keys($fields_values));
+    $array_remove_values = array_diff(array_keys($fields_values), array_keys($subpost_fields));
 
     foreach($fields_values as $k => $v) {
       update_post_meta($post_id, $k, $v);

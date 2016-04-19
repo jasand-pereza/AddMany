@@ -5,7 +5,7 @@
   // Allow access to the AddMany Prototype outside of the jQuery
   // namespace so it can be extended
   AddMany.prototype = {
-    
+
     $this_object: null,
     $results_object: null,
     $create_button: null,
@@ -16,7 +16,7 @@
     saved_values: [],
     deleted_values: [],
     wysiwyg_inc: 0,
-    current_variation: 'default_variation',
+    current_variation: null,
 
     init: function($object) {
       var self = this;
@@ -25,11 +25,12 @@
       this.$this_object = $object;
 
       this.field_definitions = field_definitions;
+
       this.checkAndSetHasOtherFields();
-     
+
       $object.after(this.getActualValuesTemplate());
       $object.parent().prepend(this.getDeletedValuesInputTemplate());
-      
+
       this.$deleted_values_input = $object.parent()
         .find('input[name="addmany_deleted_ids"]');
 
@@ -48,7 +49,7 @@
       if(this.current_post_id !== null) {
         this.loadSaved(this.appendSaved);
       }
-      
+
       self.$results_object = $object.parent()
         .find('.addmany-actual-values');
       self.$results_object.css('height', 'auto');
@@ -58,7 +59,7 @@
       this.checkAndAddWYSIWYG();
 
       this.addUploads(self.$this_object.find('li'));
-      
+
       this.$this_object.find('.addmany-result').each(function() {
         $(this).find('.upload').each(function(){
           self.getPreviewThumb($(this));
@@ -70,7 +71,7 @@
 
     checkAndAddWYSIWYG: function() {
       // WYSIWYG editors
-   
+
       var $ = jQuery;
       var self = this;
       // avoid this by loading this JavaScript file earlier
@@ -84,7 +85,7 @@
           self.wysiwyg_inc++;
         });
       }, 1000);
-     
+
     },
 
     checkAndSetHasOtherFields: function() {
@@ -136,7 +137,7 @@
       }
 
       self.$results_object.sortable(self.getSortableConfig());
-      
+
 
       self.$results_object
         .on('sortupdate', function(event, ui) {
@@ -230,7 +231,7 @@
     },
 
     createHandler: function(e) {
-      
+
       var $ = jQuery;
       var self = this;
       e.preventDefault();
@@ -261,10 +262,11 @@
 
       var field_key = this.$this_object.attr('name');
       var subfields = this.field_definitions[field_key];
-      
+
       var options = $.map(subfields, function(i, key) {
         return key;
       });
+      self.current_variation = options[0];
 
       this.$this_object.parent().find('select').on('change', function() {
         self.current_variation = options[$(this).val()];
@@ -278,11 +280,12 @@
     getFieldsVariationTemplate: function() {
       var field_key = this.$this_object.attr('name');
       var subfields = this.field_definitions[field_key];
-     
+      if(Object.keys(subfields).length === 1) return;
+
       var options = $.map(subfields, function(i, key) {
         return key;
       });
-    
+
       return Taco.Util.HTML.selecty(
         options,
         '',
@@ -528,7 +531,7 @@
           if(fields_data[f].value !== null) {
             attribs.checked = 'checked';
           }
-       
+
           html_field = Taco.Util.HTML.tag(
             'input',
             null,
@@ -625,7 +628,7 @@
     },
 
     addUploads: function($obj) {
-  
+
       // Initial loading of thumbnail
       $obj.find('.upload').each(function() {
         if($(this).val().match(/(jpg|jpeg|png|gif)$/)) {
@@ -636,7 +639,7 @@
   };
 
   if(!$('.addmany').length) return;
-  
+
   $('.addmany').each(function() {
     (new AddMany()).init($(this));
   });

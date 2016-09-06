@@ -211,16 +211,19 @@ class AddMany {
   }
 
   private static function getFieldDefinitionKeys($field_assigned_to, $parent_id, $fields_variation) {
+    $post_parent = \Taco\Post\Factory::create($parent_id);
+    $post_parent->loaded_post = $post_parent;
     return array_keys(
-      \Taco\Post\Factory::create($parent_id)
-        ->getFields()[$field_assigned_to][$fields_variation]['fields']
+      $post_parent ->getFields()[$field_assigned_to][$fields_variation]['fields']
     );
   }
 
   private static function getFieldDefinitionKeyAttribs($field_assigned_to, $parent_id, $fields_variation) {
 
-    $record_fields = \Taco\Post\Factory::create($parent_id)
-      ->getFields()[$field_assigned_to][$fields_variation]['fields'];
+    $post_parent = \Taco\Post\Factory::create($parent_id);
+    $post_parent->loaded_post = $post_parent;
+
+    $record_fields = $post_parent->getFields()[$field_assigned_to][$fields_variation]['fields'];
     $fields_attribs = [];
 
     if(!Arr::iterable($record_fields)) return [];
